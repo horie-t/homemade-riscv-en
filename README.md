@@ -1,3 +1,3 @@
-# [『プログラマのためのFPGAによるRISC-Vマイコンの作り方』](https://www.amazon.co.jp/dp/B07G2CHSK3)のサポート・リポジトリです。
+# This is support repository of ["How to make RISC-V Microcomputer using FPGA for programmer"](https://www.amazon.co.jp/dp/B07G2CHSK3)
 
-各種情報は[Wiki](https://github.com/horie-t/homemade-riscv/wiki)を参照してください。
+Please refer to [Wiki](https://github.com/horie-t/homemade-riscv-en/wiki) for details
