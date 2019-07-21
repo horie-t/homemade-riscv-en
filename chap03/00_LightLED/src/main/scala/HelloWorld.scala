@@ -1,7 +1,7 @@
 // See LICENSE for license details.
 
 /**
-  * 「Hello, word!」を表示するクラス
+  * Class of displaying "Hello, word!"
   */
 class HelloWorld {
   private val message: String = "Hello, world!"
@@ -14,7 +14,7 @@ class HelloWorld {
 }
 
 /**
-  * HelloWorldクラスのコンパニオン(対になる)オブジェクト
+  * Companion object to HelloWorld class
   */
 object HelloWorld {
   def main(args: Array[String]) = {

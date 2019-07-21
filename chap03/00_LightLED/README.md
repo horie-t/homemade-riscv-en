@@ -1,4 +1,4 @@
-LEDを点灯する
+light the LED
 ===========
 
-LED0を点灯するだけのプロジェクトです。
+It is a project only to light LED0.
