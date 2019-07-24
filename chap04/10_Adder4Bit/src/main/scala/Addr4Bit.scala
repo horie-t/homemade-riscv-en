@@ -3,14 +3,14 @@
 import chisel3._
 import chisel3.util._
 
-/** 加算器(4bit)
+/** Adder (4bit)
   */
 class Adder4Bit extends Module {
   val io = IO(new Bundle {
     val a = Input(UInt(4.W))
     val b = Input(UInt(4.W))
 
-    /* この加算器同士を繋いで、更に多ビットの加算器を作れるようにする。 */
+    /* By connecting the adders together, it is possible to create a more multi-bit adder. */
     val carryIn = Input(UInt(1.W))
 
     val sum = Output(UInt(4.W))
@@ -18,7 +18,7 @@ class Adder4Bit extends Module {
   })
 
   /*
-   * 4ビット分のAdderを生成する。
+   * Generate Adders for 4 bits.
    */
   val adder0 = Module(new FullAdder)
   adder0.io.a := io.a(0)
@@ -28,7 +28,7 @@ class Adder4Bit extends Module {
   val adder1 = Module(new FullAdder)
   adder1.io.a := io.a(1)
   adder1.io.b := io.b(1)
-  adder1.io.carryIn := adder0.io.carryOut // 下位の桁の桁上げ出力が伝搬してくる
+  adder1.io.carryIn := adder0.io.carryOut // The carry output of the lower digit propagates
 
   val adder2 = Module(new FullAdder)
   adder2.io.a := io.a(2)
@@ -40,13 +40,13 @@ class Adder4Bit extends Module {
   adder3.io.b := io.b(3)
   adder3.io.carryIn := adder2.io.carryOut
 
-  // 各桁の合計を連結する
+  // Concatenate the sum of each digit
   io.sum := Cat(adder3.io.sum, adder2.io.sum, adder1.io.sum, adder0.io.sum)
 
   io.carryOut := adder3.io.carryOut
 }
 
-/** 加算器(4bit)。forループ版
+/** Adder (4bit). "for loop" version
   */
 class Adder4BitFor extends Module {
   val io = IO(new Bundle {
@@ -57,7 +57,7 @@ class Adder4BitFor extends Module {
     val carryOut = Output(UInt(1.W))
   })
 
-  val fullAdders = VecInit(Seq.fill(4){ Module(new FullAdder).io }) // [注意]ioを渡している
+  val fullAdders = VecInit(Seq.fill(4){ Module(new FullAdder).io }) // [Caution] we pass "io"
   val carries = Wire(Vec(5, UInt(1.W)))
   val sum = Wire(Vec(4, UInt(1.W)))
 
@@ -75,9 +75,9 @@ class Adder4BitFor extends Module {
   io.carryOut := carries(4)
 }
 
-/** 加算器。
+/** adder
   * 
-  * @param n ビット幅
+  * @param n bit width
   */
 class Adder(n: Int) extends Module {
   val io = IO(new Bundle {
@@ -88,7 +88,7 @@ class Adder(n: Int) extends Module {
     val carryOut = Output(UInt(1.W))
   })
 
-  /** デフォルトのビット幅のコンストラクタ
+  /** contructor with default bit width
     */
   def this() = this(4)
 
@@ -115,14 +115,15 @@ class AdderLED extends Module {
     val a = Input(UInt(4.W))
     val b = Input(UInt(4.W))
     val seg7LEDBundle = Output(new Seg7LEDBundle)
-    val overflowLED = Output(UInt(1.W)) // 桁溢れが発生したらLEDを点灯させる
+    val overflowLED = Output(UInt(1.W)) // Lights the LED when overflow occurs
   })
 
   val seg7LED = Module(new Seg7LED1Digit)
   val adder = Module(new Adder4Bit)
   adder.io.a := io.a
   adder.io.b := io.b
-  adder.io.carryIn := 0.U // 最下位桁の桁上げ入力は存在しないので0を割り当て
+  // Since there is no carry input of the least significant digit, 0 is assigned
+  adder.io.carryIn := 0.U
 
   seg7LED.io.num := adder.io.sum
 
@@ -135,14 +136,15 @@ class AdderLEDFor extends Module {
     val a = Input(UInt(4.W))
     val b = Input(UInt(4.W))
     val seg7LEDBundle = Output(new Seg7LEDBundle)
-    val overflowLED = Output(UInt(1.W)) // 桁溢れが発生したらLEDを点灯させる
+    val overflowLED = Output(UInt(1.W)) // light LED when overflow occur
   })
 
   val seg7LED = Module(new Seg7LED1Digit)
   val adder = Module(new Adder4BitFor)
   adder.io.a := io.a
   adder.io.b := io.b
-  adder.io.carryIn := 0.U // 最下位桁の桁上げ入力は存在しないので0を割り当て
+  // Since there is no carry input of the least significant digit, 0 is assigned
+  adder.io.carryIn := 0.U
 
   seg7LED.io.num := adder.io.sum
 
@@ -151,7 +153,7 @@ class AdderLEDFor extends Module {
 }
 
 /**
-  * Verilogファイルを生成するための、オブジェクト
+  * Objcect to output Verilog file
   */
 object AdderLED extends App {
   chisel3.Driver.execute(args, () => new AdderLED)
@@ -162,7 +164,7 @@ object AdderLEDFor extends App {
 }
 
 object Adder extends App {
-  // 8ビットの加算器を生成
+  // generate 8 bit adder.
   chisel3.Driver.execute(args, () => new Adder(8))
 }
 
