@@ -1,3 +1,5 @@
-4入力マルチプレクサ(Mux2関数化版)
+4 input multiplexer. 
 ====================
+
+Functional module version and Chisel verision
 

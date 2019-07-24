@@ -3,13 +3,13 @@
 import chisel3._
 
 /**
-  * 各種論理演算(ベクトル版)
+  * Logic gate (Vector version)
   */
 class LogicGatesVec extends Module {
   val io = IO(new Bundle {
-    /** スイッチの入力 */
+    /** Input from switch */
     val switches = Input(Vec(2, Bool()))
-    /** LEDへの出力 */
+    /** Output to LED */
     val leds = Output(Vec(7, Bool()))
   })
 

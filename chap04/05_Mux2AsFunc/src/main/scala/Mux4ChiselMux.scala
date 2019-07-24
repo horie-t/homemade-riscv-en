@@ -2,8 +2,8 @@
 
 import chisel3._
 
-/** 4入力マルチプレクサ。
-  * selectorの値で、0から3を選択します。
+/** 4 input multiplexer.
+  * Select from among 0 - 3 using selector value.
   */
 class Mux4ChiselMux extends Module {
   val io = IO(new Bundle {
@@ -21,7 +21,7 @@ class Mux4ChiselMux extends Module {
 }
 
 /**
-  * Mux4のVerilogファイルを生成するための、オブジェクト
+  * Object to output Verilog file of Mux4.
   */
 object Mux4ChiselMux extends App {
   chisel3.Driver.execute(args, () => new Mux4ChiselMux())

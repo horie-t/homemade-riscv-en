@@ -1,3 +1,3 @@
-論理ゲート(ベクトル版)
+Logic gate (Vector version)
 ====================
 

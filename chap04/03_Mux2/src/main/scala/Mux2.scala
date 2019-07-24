@@ -2,8 +2,8 @@
 
 import chisel3._
 
-/** マルチプレクサ。
-  * selectorが0ならin_0を、1ならin_1の信号を出力します。
+/** Multiplexer.
+  * If selecter is 0, output the value of in_0, otherwise in_1.
   */
 class Mux2 extends Module {
   val io = IO(new Bundle {
@@ -17,7 +17,7 @@ class Mux2 extends Module {
 }
 
 /**
-  * Mux2のVerilogファイルを生成するための、オブジェクト
+  * Object to output Verilog file of Mux2.
   */
 object Mux2 extends App {
   chisel3.Driver.execute(args, () => new Mux2())

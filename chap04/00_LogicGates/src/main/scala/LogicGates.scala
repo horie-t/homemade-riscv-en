@@ -3,19 +3,19 @@
 import chisel3._
 
 /**
-  * 各種論理演算
+  * Boolean operations
   */
 class LogicGates extends Module {
   val io = IO(new Bundle {
-    val switch_a = Input(Bool()) // 入力A
-    val switch_b = Input(Bool()) // 入力B
-    val led_not = Output(Bool()) // NOT Aの結果をLEDに繋げる
-    val led_and = Output(Bool()) // ANDの〃
-    val led_or = Output(Bool())  // ORの〃
-    val led_nand = Output(Bool()) // NANDの〃
-    val led_nor = Output(Bool())  // NORの〃
-    val led_xor = Output(Bool())  // XORの〃
-    val led_nxor = Output(Bool()) // NXORの
+    val switch_a = Input(Bool()) // input A
+    val switch_b = Input(Bool()) // input B
+    val led_not = Output(Bool()) // connect result of "NOT A" to LED
+    val led_and = Output(Bool()) // AND
+    val led_or = Output(Bool())  // OR
+    val led_nand = Output(Bool()) // NAND
+    val led_nor = Output(Bool())  // NOR
+    val led_xor = Output(Bool())  // XOR
+    val led_nxor = Output(Bool()) // NXOR
   })
 
   io.led_not  := ~io.switch_a
