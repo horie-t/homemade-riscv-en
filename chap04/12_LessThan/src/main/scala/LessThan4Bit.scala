@@ -4,7 +4,7 @@ import chisel3._
 import chisel3.util._
 
 /**
-  * 小なりの関係演算
+  * 4 bit less than
   */
 class LessThan4Bit extends Module {
   val io = IO(new Bundle {
@@ -18,8 +18,9 @@ class LessThan4Bit extends Module {
   adder.io.b := ~(io.b)
   adder.io.carryIn := 1.U
 
-  // 符号が同じ場合は結果の符号を見ればよい。
-  // 違う場合は、aの方の符号を見ればよい。(正 - 負 = 正、負 - 正 = 負 なので)
+  // When the signs are the same, it is determined by the sign of the result.
+  // If it is different, it is determined by the sign of a.
+  // (positive - negative = positive. negative - positive = negative)
   io.result := Mux(io.a(3) === io.b(3), adder.io.sum(3), io.a(3))
 }
 

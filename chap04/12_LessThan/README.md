@@ -1,3 +1,3 @@
-小なりの関係演算
+Comparison of the numbers
 ====================
 

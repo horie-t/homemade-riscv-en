@@ -2,8 +2,8 @@
 
 import chisel3._
 
-/** マルチプレクサ。
-  * selectorが0ならin_0を、1ならin_1の信号を出力します。
+/** Multiplexer.
+  * If selecter is 0, output the value of in_0, otherwise in_1.
   */
 class Mux2 extends Module {
   val io = IO(new Bundle {
@@ -16,15 +16,15 @@ class Mux2 extends Module {
   io.out := (~io.selector & io.in_0) | (io.selector & io.in_1)
 }
 
-/** Mux2のコンパニオン・オブジェクト
+/** Companion object of Mux2
   */
 object Mux2 {
-/** マルチプレクサ。
-  * @param selector 1ビットの選択信号
-  * @param in_0     1ビットの入力信号
-  * @param in_1     1ビットの 入力信号
+/** Multiplexer
+  * @param selector 1-bit select signal
+  * @param in_0     1-bit input signal
+  * @param in_1     1-bit input signal
   * 
-  * @return selectorが0ならin_0を、1ならin_1の信号を出力します。
+  * @return If selecter is 0, output the value of in_0, otherwise in_1.
   */
   def apply(selector: UInt, in_0: UInt, in_1: UInt): UInt = {
     val mux2 = Module(new Mux2())

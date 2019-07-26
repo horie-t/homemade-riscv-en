@@ -3,16 +3,20 @@
 import chisel3._
 import chisel3.util._
 
-/** 左シフタ。
+/** Left shifter
   */
 class LeftShifter extends Module {
   val io = IO(new Bundle {
     val in = Input(UInt(4.W))
-    val shiftAmount = Input(UInt(2.W)) // 入力が4ビットなので、2ビットで十分
+    // Since the input is 4 bits, 2 bits are sufficient for
+    // specifying the shift amount
+    val shiftAmount = Input(UInt(2.W))
     val out = Output(UInt(4.W))
   })
 
-  // 最下位ビットはシフト量が0の時に入力最下位ビットを出力。それ以外は0になる。
+  // The output of the least significant bit becomes the least 
+  // significant bit of input when the shift amount is 0, and 
+  // becomes 0 otherwise.
   val mux0 = Module(new Mux4)
   mux0.io.selector := io.shiftAmount
   mux0.io.in_0 := io.in(0)
@@ -45,7 +49,7 @@ class LeftShifter extends Module {
 }
 
 /**
-  * Verilogファイルを生成するための、オブジェクト
+  * Object to output Verilog file of Mux4.
   */
 object LeftShifter extends App {
   chisel3.Driver.execute(args, () => new LeftShifter)
