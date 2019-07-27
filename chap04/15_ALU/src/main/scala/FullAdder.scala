@@ -2,7 +2,7 @@
 
 import chisel3._
 
-/** 全加算器
+/** Full Adder
   */
 class FullAdder extends Module {
   val io = IO(new Bundle {
@@ -13,24 +13,24 @@ class FullAdder extends Module {
     val carryOut = Output(UInt(1.W))
   })
 
-  // まず同一桁の足し算
+  // Add up to the same digit
   val halfAddr = Module(new HalfAdder)
   halfAddr.io.a := io.a
   halfAddr.io.b := io.b
 
-  // 同一桁の合計と桁上げ入力の足し算
+  // Addition of same digit sum and carry input
   val halfAddrCarry = Module(new HalfAdder)
   halfAddrCarry.io.a := halfAddr.io.sum
   halfAddrCarry.io.b := io.carryIn
 
   io.sum := halfAddrCarry.io.sum
 
-  // 2つの半加算器の結果のどちらかでも桁上げ出力が発生していたら、全体として桁上げ
+  // If a carry output is generated in either of the results of the two half adders, a carry is output
   io.carryOut := halfAddr.io.carryOut | halfAddrCarry.io.carryOut
 }
 
 /**
-  * Verilogファイルを生成するための、オブジェクト
+  * Objcect to output Verilog file
   */
 object FullAdder extends App {
   chisel3.Driver.execute(args, () => new FullAdder)
