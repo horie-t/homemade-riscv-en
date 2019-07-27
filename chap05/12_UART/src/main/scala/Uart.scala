@@ -26,7 +26,7 @@ class Uart extends Module {
   io.rts := false.B
 }
 
-/** UART送信
+/** UART Transmitter
   */
 class UartTx extends Module {
   val io = IO(new Bundle {
@@ -34,18 +34,21 @@ class UartTx extends Module {
     val txData   = Output(Bool())
   })
 
-  /* ステート・マシン定義 */
+  /* State machine definition */
   val sIdle :: sStartBit :: sSend :: sStopBit :: Nil = Enum(4)
   val state = RegInit(sIdle)
 
-  val (txCount, txEnable) = Counter(true.B, 100000000 / 115200) // 状態遷移用カウンタ
-  val sendCount = Reg(UInt(3.W))                      // 8ビット送信
-  val shiftReg = Module(new ShiftRegisterPISO(8))     // 送信データ用シフトレジスタ
+  // Counter for state transition
+  val (txCount, txEnable) = Counter(true.B, 100000000 / 115200)
+  // Counter for 8-bit transmission
+  val sendCount = Reg(UInt(3.W))
+  // Shift register for transmission data
+  val shiftReg = Module(new ShiftRegisterPISO(8))
   shiftReg.io.d      := Reverse(io.sendData.bits)
   shiftReg.io.load   := io.sendData.valid
   shiftReg.io.enable := state === sSend && txEnable
 
-  // 状態遷移
+  // State transition
   when (state === sIdle && io.sendData.valid)  {
     state := sStartBit
     txCount := 0.U
@@ -76,7 +79,7 @@ class UartTx extends Module {
     (state === sStopBit)  -> true.B))
 }
 
-/** UART受信
+/** UART receiver
   */
 class UartRx extends Module {
   val io = IO(new Bundle {
@@ -84,13 +87,16 @@ class UartRx extends Module {
     val receiveData = Decoupled(UInt(8.W))
   })
 
-  /* ステート・マシン定義 */
+  /* State machine definition */
   val sIdle :: sStartBit :: sReceive :: sStopBit :: Nil = Enum(4)
   val state = RegInit(sIdle)
 
-  val (rxCount, rxEnable) = Counter(true.B, 100000000 / 115200) // 状態遷移用カウンタ
-  val (rxHalfCount, rxHalfEnable) = Counter(true.B, 100000000 / 115200 / 2) // 1/2ビット周期カウンタ
-  val receiveCount = Reg(UInt(3.W))                    // 8ビット受信
+  // Counter for state transition 
+  val (rxCount, rxEnable) = Counter(true.B, 100000000 / 115200)
+   // Counter for half a cycle of 1 bit
+  val (rxHalfCount, rxHalfEnable) = Counter(true.B, 100000000 / 115200 / 2)
+  // Counter for 8-bit receiving
+  val receiveCount = Reg(UInt(3.W))
 
   val shiftReg = Module(new ShiftRegisterSIPO(8))
   shiftReg.io.shiftIn := io.rxData
@@ -99,7 +105,7 @@ class UartRx extends Module {
   val rDataValid = RegInit(false.B)
   val start = NegEdge(Synchronizer(io.rxData))
 
-  // 状態遷移
+  // State transition
   when (state === sIdle && start) {
     state := sStartBit
     rxHalfCount := 0.U

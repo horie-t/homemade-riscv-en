@@ -3,17 +3,17 @@
 import chisel3._
 import chisel3.util._
 
-/** 時計
+/** Clock
   */
 class Clock extends Module {
   val io = IO(new Bundle {
     val seg7led = Output(new Seg7LEDBundle)
   })
 
-  val (clockNum, oneSec) = Counter(true.B, 100000000) // 100Mクロック分カウント
-  val (sec, oneMin)      = Counter(oneSec, 60)        // 60秒カウント
-  val (min, oneHour)     = Counter(oneMin, 60)        // 60分カウント
-  val (hour, oneDay)     = Counter(oneHour, 24)       // 24時間カウント
+  val (clockNum, oneSec) = Counter(true.B, 100000000) // Count for 100M clocks
+  val (sec, oneMin)      = Counter(oneSec, 60)        // 60 seconds count
+  val (min, oneHour)     = Counter(oneMin, 60)        // 60 minutes count
+  val (hour, oneDay)     = Counter(oneHour, 24)       // 24 hours count
 
   val seg7LED = Module(new Seg7LED)
   seg7LED.io.digits := VecInit(List(sec % 10.U, (sec / 10.U)(3, 0), min % 10.U, (min / 10.U)(3, 0),

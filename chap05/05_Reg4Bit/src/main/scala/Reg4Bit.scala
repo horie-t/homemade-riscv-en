@@ -4,7 +4,7 @@ import chisel3._
 import chisel3.core.withReset
 import chisel3.util._
 
-/** 4ビットレジスタ
+/** 4 bits Register
   */
 class Reg4Bit extends Module {
   val io = IO(new Bundle {

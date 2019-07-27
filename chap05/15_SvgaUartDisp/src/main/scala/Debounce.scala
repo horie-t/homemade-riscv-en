@@ -3,7 +3,7 @@
 import chisel3._
 import chisel3.util._
 
-/** プッシュボタン用デバンウンス
+/** Debounce module for push button
   */
 class Debounce extends Module {
   val io = IO(new Bundle{
@@ -11,15 +11,17 @@ class Debounce extends Module {
     val out = Output(Bool())
   })
 
-  val (count, enable) = Counter(true.B, 10000000) // 100ミリ秒間隔で値を取り込む
+  // Capture values at 100 millisecond intervals
+  val (count, enable) = Counter(true.B, 10000000) 
 
   val reg0 = RegEnable(io.in, false.B, enable)
   val reg1 = RegEnable(reg0,  false.B, enable)
 
-  io.out := reg0 && !reg1 && enable // enableの時だけ変化を見るようにして、1クロックのパルスにする
+  // Change is detected only when enable, and it makes pulse of 1 clock
+  io.out := reg0 && !reg1 && enable 
 }
 
-/** プッシュボタン用デバンウンス
+/** Debounce module for push button(Singleton object)
   */
 object Debounce {
   def apply(in: Bool): Bool = {

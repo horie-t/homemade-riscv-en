@@ -3,33 +3,36 @@
 import chisel3._
 import chisel3.util._
 
-/** 7セグメントLED用のバンドル
+/** Bundle for 7-segment LED
   */
 class Seg7LEDBundle extends Bundle {
-  /** 各セグメントの点灯用。0〜7をCAからCGに対応させる事。0の時に点灯、1の時に消灯します。 */
-  val cathodes = UInt(7.W)
-  /** 小数点用。0の時に点灯、1の時に消灯。 */
-  val decimalPoint = UInt(1.W)
-  /** 桁の選択用。0の桁が点灯、１の桁が消灯。 */
-  val anodes = UInt(8.W)
+  /** For glowing each segment. Make 0 to 7 correspond to CA to CG. It lights when it is 0, and goes out when it is 1. */
+  val cathodes = Output(UInt(7.W))
+  /** For decimal point. It lights when it is 0, and goes out when it is 1.  */
+  val decimalPoint = Output(UInt(1.W))
+  /** For digit selection. The digit which is 1 glows up. */
+  val anodes = Output(UInt(8.W))
 }
 
-/** 7セグメントLED点灯モジュール(8桁版)
+/** 7 segment LED (8 digit)
   */
 class Seg7LED extends Module {
   val io = IO(new Bundle {
-    val digits = Input(Vec(8, UInt(4.W))) // 8桁分の4ビットの数値をVecで確保する
+    // allocate 8 digit 4 bit values.
+    val digits = Input(Vec(8, UInt(4.W))) 
     val seg7led = Output(new Seg7LEDBundle)
   })
 
-  /* 各桁を切り替える時間のカウンタ
-   * Counterは、引数にカウントアップする条件(cond)、カウントする数(n, 0〜n-1までカウントする)をとり、
-   * 現在のカウント数の値の信号、n-1にカウントアップした時ににtrue.Bになる信号のタプルを返します。 
-   * カウントアップ条件にtrue.Bを渡すと、毎クロックカウントアップします。 */
+  /* Counter of time to switch each digit.
+   * First argument is condition to count up.
+   * Second argument is the number counting up. (n, count from 0 to n-1)
+   * Return value is taple of number of counter and 
+   * signal that becomes ture.B when counter equals to n - 1.
+   * If condition is true.B, count every clock. */
   val (digitChangeCount, digitChange) = Counter(true.B, 100000) 
 
-  val (digitIndex, digitWrap) = Counter(digitChange, 8) // 何桁目を表示するか
-  val digitNum = io.digits(digitIndex)        // 表示桁の数値
+  val (digitIndex, digitWrap) = Counter(digitChange, 8) // Digit to display
+  val digitNum = io.digits(digitIndex)        // number of display digit
 
   io.seg7led.cathodes := MuxCase("b111_1111".U,
     Array(                   // gfe_dcba の順序にcathodeが並ぶ
@@ -52,29 +55,30 @@ class Seg7LED extends Module {
 
   val anodes = RegInit("b1111_1110".U(8.W))
   when (digitChange) {
-    // 表示桁の切り替えタイミングで、ローテートシフト
+    // Rotate shift when switching display digit
     anodes := Cat(anodes(6, 0), anodes(7))
   }
   io.seg7led.anodes := anodes
 
-  io.seg7led.decimalPoint := 1.U         // 小数点は点灯させない。
+  io.seg7led.decimalPoint := 1.U         // Do not light the decimal point.
 }
 
 /**
-  * 7セグメントLED点灯モジュール(1桁版)
+  * 7 segment LED lighting module(1 digit version)
   */
 class Seg7LED1Digit extends Module {
   val io = IO(new Bundle {
     val num = Input(UInt(4.W))
-    val seg7led = Output(new Seg7LEDBundle) // 引数を取らないコンストラクタなので型名の後の括弧は省略してみた
+    val seg7led = Output(new Seg7LEDBundle) // Since it is a constructor that takes no arguments, parentheses after the type name are omitted
   })
 
-  // いちいちio.を書くのが面倒なので、別名定義する
+  // define alias
   private val seg7led = io.seg7led
   private val num = io.num
 
-  seg7led.cathodes := MuxCase("b111_1111".U, // デフォルト値(全部消灯)。16すべてのパターンが定義されるので使われない。
-    Array(             // gfe_dcba の順序にcathodeが並ぶ
+  // Default value (all turned off). It is not used because all 16 patterns are defined.
+  seg7led.cathodes := MuxCase("b111_1111".U, 
+    Array(               // gfe_dcba is order of cathodes
       (num === "h0".U) -> "b100_0000".U,
       (num === "h1".U) -> "b111_1001".U,
       (num === "h2".U) -> "b010_0100".U,
@@ -92,8 +96,8 @@ class Seg7LED1Digit extends Module {
       (num === "he".U) -> "b000_0110".U,
       (num === "hf".U) -> "b000_1110".U))
 
-  seg7led.decimalPoint := 1.U         // 小数点は点灯させない。
-  seg7led.anodes := "b1111_1110".U    // 0桁目だけ点灯させる
+  seg7led.decimalPoint := 1.U         // Do not light the decimal point.
+  seg7led.anodes := "b1111_1110".U    // Only the 0th digit light
 }
 
 object Seg7LED1Digit extends App {

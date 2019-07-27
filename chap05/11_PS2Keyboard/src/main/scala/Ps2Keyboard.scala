@@ -3,7 +3,7 @@
 import chisel3._
 import chisel3.util._
 
-/** PS/2 キーボード入力
+/** PS/2 keyboard input
   */
 class Ps2Keyboard extends Module {
   val io = IO(new Bundle {
@@ -12,7 +12,7 @@ class Ps2Keyboard extends Module {
     val seg7led = Output(new Seg7LEDBundle)
   })
 
-  // 状態遷移信号
+  // State transition signal
   val ps2ClkDown = NegEdge(Synchronizer(io.ps2Clock))
 
   val sIdle :: sReceive :: sParity :: Nil = Enum(3)
@@ -44,11 +44,12 @@ class Ps2Keyboard extends Module {
   receiveShiftReg.io.shiftIn := io.ps2Data
   receiveShiftReg.io.enable := state === sReceive && ps2ClkDown
 
-  // ShiftRegisterSIPOは上位ビットが古い入力なのでReverseで逆にする
+  // Since "ShiftRegisterSIPO" has an old input with high-order bits, 
+  // so reverse with "Reverse"
   val keyboadScanCode = RegEnable(Reverse(receiveShiftReg.io.q),
     0.U(8.W), state === sParity)
 
-  // 出力
+  // output
   val seg7LED = Module(new Seg7LED)
   seg7LED.io.digits := VecInit(List(keyboadScanCode(3, 0), keyboadScanCode(7, 4))
     ::: List.fill(6) { 0.U(4.W) })

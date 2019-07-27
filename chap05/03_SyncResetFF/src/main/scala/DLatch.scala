@@ -2,7 +2,7 @@
 
 import chisel3._
 
-/** Dラッチ
+/** D Latch
   */
 class DLatch extends Module {
   val io = IO(new Bundle {

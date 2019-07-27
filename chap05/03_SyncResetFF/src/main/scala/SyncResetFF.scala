@@ -2,7 +2,7 @@
 
 import chisel3._
 
-/** 同期式リセット機能付きフリップフロップ
+/** Synchronous resetable flip flop
   */
 class SyncResetFF extends Module {
   val io = IO(new Bundle {

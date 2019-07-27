@@ -2,7 +2,7 @@
 
 import chisel3._
 
-/** SRラッチ
+/** SR Latch
   */
 class SRLatch extends Module {
   val io = IO(new Bundle {

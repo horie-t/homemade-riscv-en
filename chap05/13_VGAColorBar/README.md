@@ -1,3 +1,3 @@
-VGA画面にカラーバーを表示
+Color bar on VGA display
 ========================
 

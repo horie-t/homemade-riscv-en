@@ -2,7 +2,7 @@
 
 import chisel3._
 
-/** リセット可能なイネーブル機能付きフリップフロップ
+/** Resetable flip flop with enable function
   */
 class EnableResetFF extends Module {
   val io = IO(new Bundle {

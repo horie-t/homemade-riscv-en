@@ -12,23 +12,26 @@ class VgaBundle extends Bundle {
 }
 
 object VGA {
-  val fps         = 60  // 1秒間に60回画面全体を描画
-  val hMax        = 800 // 水平方向のピクセル数(非表示期間も含む)
-  val hSyncPeriod = 96  // 水平同期の期間
-  val hBackPorch  = 48  // 水平バックポーチ
-  val hFrontPorch = 16  // 水平フロントポーチ
-  val vMax        = 521 // 垂直方向のライン数(非表示期間も含む)
-  val vSyncPeriod = 2   // 垂直同期の期間
-  val vBackPorch  = 33  // 垂直バックポーチ
-  val vFrontPorch = 10  // 垂直フロントポーチ
+  val fps         = 60  // Scan 60 times per 1 sec.
+  
+  val hMax        = 800 // The num of horizontal pixcels (include non-display)
+  val hSyncPeriod = 96  // Period of horizontal sync siginal
+  val hBackPorch  = 48  // Back poarch of horizontal sync signal
+  val hFrontPorch = 16  // Front poarch of horizontal sync signal
+  
+  val vMax        = 521 // The num of vertical lines (include non-display)
+  val vSyncPeriod = 2   // Period of vertical sync siginal
+  val vBackPorch  = 33  // Back poarch of vertical sync signal
+  val vFrontPorch = 10  // Front poarch of vertical sync signal
 
-  // 仕様上は上記が正しいが、下記にしないとずれるモニタもある。
-  // val vMax        = 512 // 垂直方向のライン数(非表示期間も含む)
-  // val vSyncPeriod = 2   // 垂直同期の期間
-  // val vBackPorch  = 10  // 垂直バックポーチ
-  // val vFrontPorch = 20  // 垂直フロントポーチ
+  // If the image is shifted vertically, set the following
+  // val vMax        = 512
+  // val vSyncPeriod = 2
+  // val vBackPorch  = 10
+  // val vFrontPorch = 20
 
-  val pxClock = (100000000.0 / 60 / 521 / 800).round.toInt // 1ピクセル分のクロック数
+  // Number of clocks for one pixel(Exactly 3.9987, but almost 4.)
+  val pxClock = (100000000.0 / fps / vMax / hMax).round.toInt 
 }
 
 import VGA._
@@ -42,22 +45,22 @@ class VgaColorBar extends Module {
   val (hCount, hEn)   = Counter(pxEn, hMax)
   val (vCount, vEn)   = Counter(hEn, vMax)
 
-  // 表示ピクセルかどうか
+  // Whether it is a display pixel
   val pxEnable = (hSyncPeriod + hBackPorch).U <= hCount && hCount < (hMax - hFrontPorch).U &&
     (vSyncPeriod + vBackPorch).U <= vCount && vCount < (vMax - vFrontPorch).U
 
-  // 640ピクセルを8つの領域に分割する。
+  // 表示ピクセルかどうか
   val colorNum = (hCount - (hSyncPeriod + hBackPorch).U) / (640 / 8).U
   val color = MuxCase("h000000".U,
     Array(
-      (colorNum === 0.U) -> "hfff".U, // 白
-      (colorNum === 1.U) -> "h000".U, // 黒
-      (colorNum === 2.U) -> "hff0".U, // 黄
-      (colorNum === 3.U) -> "h0ff".U, // シアン
-      (colorNum === 4.U) -> "h0f0".U, // 緑
-      (colorNum === 5.U) -> "hf0f".U, // マゼンタ
-      (colorNum === 6.U) -> "hf00".U, // 赤
-      (colorNum === 7.U) -> "h00f".U  // 青
+      (colorNum === 0.U) -> "hfff".U, // White
+      (colorNum === 1.U) -> "h000".U, // Black
+      (colorNum === 2.U) -> "hff0".U, // Yellow
+      (colorNum === 3.U) -> "h0ff".U, // Cyan
+      (colorNum === 4.U) -> "h0f0".U, // Green
+      (colorNum === 5.U) -> "hf0f".U, // Magenta
+      (colorNum === 6.U) -> "hf00".U, // Red
+      (colorNum === 7.U) -> "h00f".U  // Blue
     ))
 
   val pxColor = RegNext(Mux(pxEnable, color, "h000".U))

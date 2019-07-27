@@ -16,11 +16,11 @@ class CharVramWriter extends Module {
     val vramData = Decoupled(new VramDataBundle)
   })
 
-  /* ステート定義 */
+  /* State machine definition */
   val sIdle :: sRomRead :: sShiftRegLoad :: sVramWrite :: Nil = Enum(4)
   val state = RegInit(sIdle)
 
-  // 処理中の文字の中の座標
+  // Coordinates in the character being processed
   val xInChar = RegInit(0.U(3.W))
   val yInChar = RegInit(0.U(4.W))
 
@@ -34,7 +34,7 @@ class CharVramWriter extends Module {
   pxShiftReg.io.load := state === sShiftRegLoad
   pxShiftReg.io.enable := state === sVramWrite
 
-  // ステート・マシン
+  // State transition
   switch (state) {
     is (sIdle) {
       when (io.charData.valid) {
@@ -63,7 +63,7 @@ class CharVramWriter extends Module {
     }
   }
 
-  // 文字の左上の点のVRAMアドレス
+  // VRAM address of upper left point of character
   val pxBaseAddr = (VGA.hDispMax * 16).U * io.charData.bits.row + 8.U * io.charData.bits.col
   io.vramData.bits.addr := pxBaseAddr + VGA.hDispMax.U * yInChar + xInChar
   io.vramData.bits.data := Mux(pxShiftReg.io.shiftOut, io.charData.bits.color, 0.U)

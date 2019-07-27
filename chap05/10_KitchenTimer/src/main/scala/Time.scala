@@ -4,21 +4,21 @@ import chisel3._
 import chisel3.util._
 
 object Time {
-  // 60進数表記(0〜59)に必要なビット幅
+  // Bit width required for 60-base notation (0 to 59)
   val sexagesimalWitdh = (log2Floor(59) + 1).W
 }
 
-/** 時間のモデルクラス
+/** Model class of time
   */
 class Time extends Module {
   val io = IO(new Bundle {
-    val incMin = Input(Bool()) // 時間を1分増加します。
-    val incSec = Input(Bool()) // 時間を1秒増加します。
-    val countDown = Input(Bool()) // カウントダウンを実行します。
+    val incMin = Input(Bool()) // Increase time by one minute.
+    val incSec = Input(Bool()) // Increase time by one second.
+    val countDown = Input(Bool()) // Run a countdown.
 
-    val min = Output(UInt(Time.sexagesimalWitdh)) // 残りの分。
-    val sec = Output(UInt(Time.sexagesimalWitdh)) // 残りの秒。
-    val zero = Output(Bool())                     // 残り時間がなくなったかどうか
+    val min = Output(UInt(Time.sexagesimalWitdh)) // Remaining minutes.
+    val sec = Output(UInt(Time.sexagesimalWitdh)) // Remaining seconds.
+    val zero = Output(Bool())                     // Whether the remaining time is gone
   })
 
   val min = RegInit(0.U(Time.sexagesimalWitdh))
@@ -40,7 +40,8 @@ class Time extends Module {
   }
 
   val zero = Wire(Bool())
-  val (count, oneSec) = Counter(io.countDown && !zero, 100000000) // 1秒未満の時間のカウンター
+  // Counter for less than 1 second
+  val (count, oneSec) = Counter(io.countDown && !zero, 100000000)
   zero := min === 0.U && sec === 0.U && count === 0.U
 
   when (io.countDown && oneSec) {

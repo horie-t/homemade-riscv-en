@@ -2,7 +2,7 @@
 
 import chisel3._
 
-/** Dフリップフロップ
+/** D flip flop
   */
 class DFlipFlop extends Module {
   val io = IO(new Bundle {

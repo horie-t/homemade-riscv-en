@@ -1,3 +1,3 @@
-VGA文字表示
+VGA Display Module
 ====================
 

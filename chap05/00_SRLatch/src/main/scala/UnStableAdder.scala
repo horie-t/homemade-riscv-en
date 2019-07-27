@@ -2,7 +2,7 @@
 
 import chisel3._
 
-/** いつまでたっても、結果が定まらないAdder
+/** Module will not finish the calculation forever
   */
 class UnStableAdder extends Module {
   val io = IO(new Bundle {

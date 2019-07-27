@@ -12,22 +12,27 @@ class VgaBundle extends Bundle {
 }
 
 abstract class DispMode {
-  val hMax: Int        // 水平方向のピクセル数(非表示期間も含む)
-  val hSyncPeriod: Int // 水平同期の期間
-  val hBackPorch: Int  // 水平バックポーチ
-  val hFrontPorch: Int // 水平フロントポーチ
+  val hMax: Int        // The num of horizontal pixcels (include non-display)
+  val hSyncPeriod: Int // Period of horizontal sync siginal
+  val hBackPorch: Int  // Back poarch of horizontal sync signal
+  val hFrontPorch: Int // Front poarch of horizontal sync signal
 
-  val vMax: Int        // 垂直方向のライン数(非表示期間も含む)
-  val vSyncPeriod: Int // 垂直同期の期間
-  val vBackPorch: Int  // 垂直バックポーチ
-  val vFrontPorch: Int // 垂直フロントポーチ
+  val vMax: Int        // The num of vertical lines (include non-display)
+  val vSyncPeriod: Int // Period of vertical sync siginal
+  val vBackPorch: Int  // Back poarch of vertical sync signal
+  val vFrontPorch: Int // Front poarch of vertical sync signal
 
-  def hDispMax = hMax - (hSyncPeriod + hBackPorch + hFrontPorch) // 水平方向の表示ピクセル数
-  def vDispMax = vMax - (vSyncPeriod + vBackPorch + vFrontPorch) // 垂直方向の表示ピクセル数
-  def pxMax = hDispMax * vDispMax                                // 画面全体の表示ピクセル数
+  // num of horizontal diplay pixcel
+  def hDispMax = hMax - (hSyncPeriod + hBackPorch + hFrontPorch)
+  // num of vertical diplay pixcel
+  def vDispMax = vMax - (vSyncPeriod + vBackPorch + vFrontPorch) 
+  // num of whole screen display pixcel
+  def pxMax = hDispMax * vDispMax
 
-  def row = vDispMax / 16 // 文字の行数(1文字の高さを16ピクセルとする)
-  def col = hDispMax / 8 // 文字の行数(1文字の幅を8ピクセルとする)
+  // num of lines in screen (one character height is 16 px)
+  def row = vDispMax / 16
+  // num of characters in line (one characters width is 8 px)
+  def col = hDispMax / 8
 }
 
 object VGA extends DispMode {
@@ -40,11 +45,11 @@ object VGA extends DispMode {
   val vSyncPeriod = 2
   val vBackPorch  = 33
   val vFrontPorch = 10
-  // 仕様上は上記が正しいが、下記にしないとずれるモニタもある。
-  // val vMax        = 512 // 垂直方向のライン数(非表示期間も含む)
-  // val vSyncPeriod = 2   // 垂直同期の期間
-  // val vBackPorch  = 10  // 垂直バックポーチ
-  // val vFrontPorch = 20  // 垂直フロントポーチ
+  // If the image is shifted vertically, set the following
+  // val vMax        = 512
+  // val vSyncPeriod = 2
+  // val vBackPorch  = 10
+  // val vFrontPorch = 20
 }
 
 object SVGA extends DispMode {
@@ -61,7 +66,7 @@ object SVGA extends DispMode {
 
 class VramDataBundle extends Bundle {
   val addr = UInt(19.W)
-  val data = UInt(8.W) // Red: 7〜5, Green: 4〜2, Blue:1〜0ビットを割り当て。
+  val data = UInt(8.W) // Red: 7〜5, Green: 4〜2, Blue:1〜0 bit
 }
 
 class VgaDisplay(mode: DispMode) extends Module {
@@ -71,10 +76,11 @@ class VgaDisplay(mode: DispMode) extends Module {
     val vga = Output(new VgaBundle)
   })
 
-  val (hCount, hEn)   = Counter(true.B, mode.hMax) // 画面用のクロック毎にカウント・アップ
+  // Count up every screen clock
+  val (hCount, hEn)   = Counter(true.B, mode.hMax)
   val (vCount, vEn)   = Counter(hEn, mode.vMax)
 
-  // 表示ピクセルかどうか
+  // Whether it is a display pixel
   val pxEnable =
     (mode.hSyncPeriod + mode.hBackPorch).U <= hCount && hCount < (mode.hMax - mode.hFrontPorch).U &&
     (mode.vSyncPeriod + mode.vBackPorch).U <= vCount && vCount < (mode.vMax - mode.vFrontPorch).U
@@ -85,7 +91,7 @@ class VgaDisplay(mode: DispMode) extends Module {
   }
 
   val vram = Module(new Vram)
-  // Aポートは外部からの書き込み用
+  // A port is for external writing
   vram.io.clka := io.vramClock
   vram.io.ena := io.vramData.valid
   vram.io.wea := io.vramData.valid
@@ -93,20 +99,20 @@ class VgaDisplay(mode: DispMode) extends Module {
   vram.io.dina := io.vramData.bits.data
   io.vramData.ready := true.B
 
-  // Bポートから読み出して、VGAポートに出力
+  // Read from B port and output to VGA port
   vram.io.clkb := clock
   vram.io.enb := pxEnable
   vram.io.web := false.B
   vram.io.addrb := vramAddr
   vram.io.dinb := 0.U
-  // VRAMからの出力は1Clock遅れるので、pxEnableをRegNextで受けている
+  // Since the output from VRAM is delayed by 1 Clock, pxEnable is received by RegNext
   val pxData = Mux(RegNext(pxEnable, false.B), vram.io.doutb, 0.U) 
 
   io.vga.red   := Cat(pxData(7, 5), pxData(5))
   io.vga.green := Cat(pxData(4, 2), pxData(2))
   io.vga.blue  := Cat(pxData(1, 0), pxData(0), pxData(0))
 
-  // VRAMからの出力の遅れに合わせる
+  // Align to delay of output from VRAM
   io.vga.hSync := RegNext(!(hCount < mode.hSyncPeriod.U), true.B)
   io.vga.vSync := RegNext(!(vCount < mode.vSyncPeriod.U), true.B)
 }

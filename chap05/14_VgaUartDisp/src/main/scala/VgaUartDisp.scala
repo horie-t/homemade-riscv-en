@@ -13,15 +13,16 @@ class VgaUartDisp extends Module {
     val vga = Output(new VgaBundle)
   })
 
-  /* ステート定義 */
+  /* State machine definition */
   val sIdle :: sCharWrite :: Nil = Enum(2)
   val state = RegInit(sIdle)
 
-  // 文字を表示する、行と列
+  // Row and column to display character
   val rowChar = RegInit(0.U(5.W))
   val colChar = RegInit(0.U(7.W))
 
-  // 文字の色(単色ではつまらないので、列によって色を変える)
+  // Character color
+  // (Because it is boring in a single color, change the color by the row)
   val colorIndex = (colChar / 10.U)(2, 0)
   val colorChar = Cat(7.U - colorIndex, colorIndex, colorIndex(1, 0))
 
@@ -30,7 +31,7 @@ class VgaUartDisp extends Module {
   io.txData := uart.io.txData
   io.rts := uart.io.rts
   uart.io.cts := io.cts
-  uart.io.sendData.valid := false.B // 何もデータは送らない
+  uart.io.sendData.valid := false.B // No data is sent
   uart.io.sendData.bits := 0.U
   uart.io.receiveData.ready := state === sIdle
 
@@ -44,7 +45,7 @@ class VgaUartDisp extends Module {
   val vgaDisplay = Module(new VgaDisplay)
   vgaDisplay.io.vramData <> charVramWriter.io.vramData
 
-  // ステート・マシン
+  // State transition
   switch (state) {
     is (sIdle) {
       when (uart.io.receiveData.valid) {

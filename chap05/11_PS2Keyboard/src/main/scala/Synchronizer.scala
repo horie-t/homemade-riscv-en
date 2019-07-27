@@ -3,7 +3,7 @@
 import chisel3._
 import chisel3.util._
 
-/** シンクロナイザ
+/** Synchronizer
   */
 class Synchronizer extends Module {
   val io = IO(new Bundle {

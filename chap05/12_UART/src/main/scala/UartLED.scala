@@ -3,7 +3,7 @@
 import chisel3._
 import chisel3.util._
 
-/** UARTのサンプル
+/** Sample module of UART
   */
 class UartLED extends Module {
   val io = IO(new Bundle {
@@ -23,13 +23,12 @@ class UartLED extends Module {
   uart.io.sendData.bits := io.sendValue
   uart.io.sendData.valid := Debounce(io.valid)
 
-  // validが来たら即座にOKを出す
   uart.io.receiveData.ready := uart.io.receiveData.valid
 
   io.rts := uart.io.rts
   uart.io.cts := io.cts
 
-  // 出力
+  // output
   val seg7LED = Module(new Seg7LED)
   seg7LED.io.digits := VecInit(List(uart.io.receiveData.bits(3, 0), uart.io.receiveData.bits(7, 4))
     ::: List.fill(6) { 0.U(4.W) })

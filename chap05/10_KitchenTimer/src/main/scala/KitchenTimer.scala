@@ -3,7 +3,7 @@
 import chisel3._
 import chisel3.util._
 
-/** キッチンタイマー
+/** Kitchen timer
   */
 class KitchenTimer extends Module {
   val io = IO(new Bundle {
@@ -13,20 +13,21 @@ class KitchenTimer extends Module {
     val seg7led = Output(new Seg7LEDBundle)
   })
 
-  /* ステートマシン定義 */
-  //  時間設定  :: タイマー稼働 :: 一時停止 :: タイマー終了
+  /* State machine definition */
+  //  "Time setting"  :: "Counting down" :: "Pause" :: "Countdown complete"
   val sTimeSet :: sRun :: sPause :: sFin :: Nil = Enum(4)
   val state = RegInit(sTimeSet)
-  val stateChange = Debounce(io.startStop) // スタート・ストップボタンは、実際は状態遷移イベント
+  // Pressing the start / stop button is a state transition event.
+  val stateChange = Debounce(io.startStop)
 
-  // 時間管理
+  // Time management
   val time = Module(new Time)
-  // 時間の変更は、設定状態か、一時停止状態のみ可能
+  // You can change the time only in the "Time setting" state or "Pause" state
   time.io.incMin := (state === sTimeSet || state === sPause) && Debounce(io.min)
   time.io.incSec := (state === sTimeSet || state === sPause) && Debounce(io.sec)
   time.io.countDown := state === sRun
 
-  // ステートマシン遷移処理
+  // State machine transition processing
   when (stateChange) {
     switch (state) {
       is (sTimeSet) {
@@ -48,7 +49,7 @@ class KitchenTimer extends Module {
     state := sFin
   }
 
-  // 出力
+  // output
   val seg7LED = Module(new Seg7LED)
   seg7LED.io.digits := VecInit(List(time.io.sec % 10.U, (time.io.sec / 10.U)(3, 0),
     time.io.min % 10.U, (time.io.min / 10.U)(3, 0)) ::: List.fill(4) { 0.U(4.W) })

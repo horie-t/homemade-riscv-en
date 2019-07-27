@@ -2,20 +2,20 @@
 
 import chisel3._
 
-/** 31ビットカウンタ。上位4ビットの値を7セグメントLEDで表示。
+/** 31 bit counter. 7 segment LED displays upper 4 bit value.
   */
 class Counter31Bit extends Module {
   val io = IO(new Bundle {
     val seg7led = Output(new Seg7LEDBundle)
   })
 
-  // 31ビット幅のカウント用のレジスタ(0で初期化する)
+  // Register for counter of 31 bit width (Initialize to 0)
   val count = RegInit(0.U(31.W))
-  count := count + 1.U // 1クロック毎に1増加
+  count := count + 1.U // 1 increase per clock
 
-  // カウントの一部のビットの値を表示
+  // display upper 4 bit of counter
   val seg7LED1Digit = Module(new Seg7LED1Digit)
-  seg7LED1Digit.io.num := count(30, 27) // 上位4ビットでの値を表示させる
+  seg7LED1Digit.io.num := count(30, 27) // display upper 4 bits
 
   io.seg7led := seg7LED1Digit.io.seg7led
 }

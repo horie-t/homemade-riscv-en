@@ -8,18 +8,18 @@ class ClockSec1Digit extends Module {
     val seg7led = Output(new Seg7LEDBundle)
   })
 
-  // 1秒カウンタ
+  // Counter for 1 second.
   val count1Sec = RegInit(0.U(27.W))
 
-  // 0から15秒までのカウンタ
+  // Counter from 0 to 15 seconds.
   val count = RegInit(0.U(4.W))
 
   when (count1Sec === 100000000.U) {
-    // 100Mクロックカウントしたら
-    count := count + 1.U // 秒をインクリメント
-    count1Sec := 0.U     // カウンタをリセット
+    // Counted up 100 Million times
+    count := count + 1.U // increment second.
+    count1Sec := 0.U     // reset counter
   } .otherwise {
-    // 通常は、1クロック毎にインクリメント
+    // Increment every 1 clock
     count1Sec := count1Sec + 1.U
   }
 
