@@ -35,7 +35,7 @@ class Seg7LED extends Module {
   val digitNum = io.digits(digitIndex)        // number of display digit
 
   io.seg7led.cathodes := MuxCase("b111_1111".U,
-    Array(                   // gfe_dcba の順序にcathodeが並ぶ
+    Array(                   // gfe_dcba is order of cathodes
       (digitNum === "h0".U) -> "b100_0000".U,
       (digitNum === "h1".U) -> "b111_1001".U,
       (digitNum === "h2".U) -> "b010_0100".U,

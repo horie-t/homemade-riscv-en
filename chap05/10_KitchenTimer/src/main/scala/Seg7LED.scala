@@ -20,6 +20,7 @@ class Seg7LED extends Module {
   val io = IO(new Bundle {
     // allocate 8 digit 4 bit values.
     val digits = Input(Vec(8, UInt(4.W))) 
+    val blink = Input(Bool())             // Whether blink
     val seg7led = Output(new Seg7LEDBundle)
   })
 
@@ -59,6 +60,13 @@ class Seg7LED extends Module {
     anodes := Cat(anodes(6, 0), anodes(7))
   }
   io.seg7led.anodes := anodes
+
+  val (blinkCount, blinkToggle) = Counter(io.blink, 100000000)
+  val blinkLight = RegInit(true.B) // Lighting when blinking
+  when (blinkToggle) {
+    blinkLight := !blinkLight
+  }
+  io.seg7led.anodes := Mux(!io.blink || blinkLight, anodes, "hff".U)
 
   io.seg7led.decimalPoint := 1.U         // Do not light the decimal point.
 }
