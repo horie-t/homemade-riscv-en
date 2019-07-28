@@ -1,1 +1,1 @@
-# 階乗計算
+# calculate factorial階乗計算
