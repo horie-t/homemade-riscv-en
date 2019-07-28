@@ -1,4 +1,4 @@
-# QEMU(RISC-V版)での、アセンブリ言語でのHello, world!
+# Hello, world! on QEMU(RISC-V C language version)
 
 CC=riscv64-unknown-elf-gcc
 TARGET=hello
@@ -16,7 +16,7 @@ startup.o: 	startup.s
 	$(CC) -march=rv64g -mabi=lp64 -o $@ -c $<
 
 run:
-	@echo "終了するには、Ctrl + a, x を押して下さい"
+	@echo "Press Ctrl + a, x to terminate"
 	qemu-system-riscv64 -M virt -kernel $(TARGET) -nographic
 
 .PHONY:	clean

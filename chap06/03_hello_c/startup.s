@@ -2,8 +2,8 @@
 	
 	.global _start
 _start:
-	la sp, sp_top		# スタック・ポインタのアドレスをlinker.ldで設定しているsp_topに設定
-	jal main		# main関数を呼び出す
-# 終了
+        la sp, sp_top        # Set stack pointer which is defined in "linker.ld" file
+        jal main             # call main function
+# finish
 fin:	
-	j fin			# main関数からもどって来て、何もしない無限ループ
+        j fin                # Infinite loop doing nothing

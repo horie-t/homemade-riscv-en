@@ -1,7 +1,7 @@
-// UARTのI/Oアドレス
+// UART I/O Address
 volatile unsigned char * const UART_ADDR = (unsigned char *)0x10000000;
 
-// 1文字送信関数
+// one character transmission function
 void sendchar(int c)
 {
   *UART_ADDR = c;
