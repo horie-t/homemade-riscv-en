@@ -1,32 +1,32 @@
-	.section .text		# プログラム本体セクション
+        .section .text          # Program body section
 
-	.equ	UART_ADDR, 0x10000000	# UARTのI/Oアドレス
+        .equ UART_ADDR, 0x10000000        # UART I/O Address
 	
 	.global _start
 _start:
-	la s0, message          # message文字列の先頭アドレスをロード
+        la s0, message          # Load start address of message string
 	
-# 文字出力ループ
+# Character output loop
 putloop: 
-	lb a0, 0(s0)		# 先頭文字をa0にロード
-	addi s0, s0, 1          # 文字列のアドレスを1文字進めておく
-	beqz a0, fin		# NUL文字(0)ならfinに分岐する
-	jal sendchar		# NUL文字ではないので、sendcharを呼び出す
-	j putloop		# ループを繰り返す
+        lb a0, 0(s0)            # Load first character to a0
+        addi s0, s0, 1          # Advance the address of the string by one character
+        beqz a0, fin            # Branch to fin if a0 is NUL character(0)
+        jal sendchar            # Call sendchar because it is not a NUL character
+        j putloop               # Repeat putloop
 	
-# 1文字送信関数
+# one character transmission function
 sendchar:
-	li t0, UART_ADDR	# UARTのI/Oアドレスの即値をロード
-	sb a0, 0(t0)		# UARTのアドレスへa0を書き込む
-	ret
+        li t0, UART_ADDR        # Load immediate value of UART I/O address
+        sb a0, 0(t0)            # Write a0 to the address of UART
+        ret                     # Return
 	
-# 終了
+# finish
 fin:	
-	j fin			# 何もしない無限ループ
+        j fin                   # Infinite loop doing nothing
 
-	.section .rodata	# 定数定義セクション
+        .section .rodata        # Constant definition section
 	
-# 表示文字列データ
+# Display string data
 message:
 	.ascii "Hello, world!\n\0"
 	

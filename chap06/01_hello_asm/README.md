@@ -1,1 +1,1 @@
-# Hello, world!のRISC-Vアセンブラ(ベアメタル)
+# Hello, world! (RISC-V assembly language version)
