@@ -3,7 +3,7 @@
 import chisel3._
 import chisel3.util._
 
-/** 入力の立ち下がりを検出します。
+/** Detects falling of input.
   */
 class NegEdge extends Module {
   val io = IO(new Bundle {
