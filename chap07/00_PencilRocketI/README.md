@@ -1,5 +1,5 @@
 PencilRocket I Core
 ====================
 
-PencilRocket I CPUコアです。
+This project is PencilRocket I CPU Core.
 

@@ -16,76 +16,78 @@ import util._
 object ScalarOpConstants {
 
   def X = BitPat("b?")
-  def N = BitPat("b0") // Noのビット・パターン
-  def Y = BitPat("b1") // Yesのビット・パターン
+  def N = BitPat("b0") // Bit pattern of No
+  def Y = BitPat("b1") // Bit pattern of Yes
 
-  // ALU入力1に入力する値
+  // Type of ALU input1
   def A1_X    = BitPat("b??")
-  def A1_ZERO = 0.U(2.W) // ゼロ・レジスタを指定
-  def A1_RS1  = 1.U(2.W) // rs1に指定されたレジスタの値
-  def A1_PC   = 2.U(2.W) // プログラム・カウンタの値
+  def A1_ZERO = 0.U(2.W) // Specify zero register
+  def A1_RS1  = 1.U(2.W) // Value of register of rs1
+  def A1_PC   = 2.U(2.W) // Value of program counter
 
-  // ALU入力2に入力する値
+  // Type of ALU input2
   def A2_X    = BitPat("b??")
-  def A2_SIZE = 1.U(2.W) // 1命令のバイト数
-  def A2_RS2  = 2.U(2.W) // rs2に指定されたレジスタの値
-  def A2_IMM  = 3.U(2.W) // 命令の中の即値
+  def A2_SIZE = 1.U(2.W) // Size in bytes of one instruction
+  def A2_RS2  = 2.U(2.W) // Value of register of rs2
+  def A2_IMM  = 3.U(2.W) // Immidate value described in instruction
 
   def IMM_X  = BitPat("b???")
-  def IMM_S  = 0.U(3.W) // S形式の即値である
-  def IMM_SB = 1.U(3.W) // B形式の即値である
-  def IMM_U  = 2.U(3.W) // U形式の即値である
-  def IMM_UJ = 3.U(3.W) // J形式の即値である
-  def IMM_I  = 4.U(3.W) // I形式の即値である
-  def IMM_Z  = 5.U(3.W) // Z形式(システム管理命令で使用)の即値である
+  def IMM_S  = UInt(0, 3) // Immidate value of S Type instruction
+  def IMM_SB = UInt(1, 3) // Immidate value of B Type instruction
+  def IMM_U  = UInt(2, 3) // Immidate value of U Type instruction
+  def IMM_UJ = UInt(3, 3) // Immidate value of J Type instruction
+  def IMM_I  = UInt(4, 3) // Immidate value of I Type instruction
+  def IMM_Z  = UInt(5, 3) // Immidate value of Z Type instruction (used in system management instruction)
 
-  // メモリ・アクセスサイズ
+  // Size of memory access
   val MT_SZ = 3.W
   def MT_X  = BitPat("b???")
-  def MT_B  = "b000".U // バイト単位アクセス
+  def MT_B  = "b000".U
 }
 
+/** Constant class for memory operation
+  */
 object MemoryOpConstants {
   val NUM_XA_OPS = 9.W
   val M_SZ      = 5.W
 
   def M_X       = BitPat("b?????")
-  def M_XRD     = "b00000".U; // int load
-  def M_XWR     = "b00001".U; // int store
+  def M_XRD     = UInt("b00000"); // Read Integer
+  def M_XWR     = UInt("b00001"); // Write Integer
 }
 
 object ALU {
-  // ALUの演算機能コード
+  // Function codes. Constant definition.
   val SZ_ALU_FN = 4.W
   def FN_X    = BitPat("b????")
-  def FN_ADD  = 0.U  // 加算
-  def FN_SL   = 1.U  // 左シフト
-  def FN_SEQ  = 2.U  // 等号(==)判定
-  def FN_SNE  = 3.U  // 不等(!=)判定
-  def FN_XOR  = 4.U  // 排他的論理和(XOR)
-  def FN_SR   = 5.U  // 右論理シフト
-  def FN_OR   = 6.U  // 論理和(OR)
-  def FN_AND  = 7.U  // 論理積(AND)
-  def FN_SUB  = 10.U // 減算
-  def FN_SRA  = 11.U // 右算術シフト
-  def FN_SLT  = 12.U // 未満(<)判定
-  def FN_SGE  = 13.U // 以上(>=)判定
-  def FN_SLTU = 14.U // 未満(<)判定。符号なし
-  def FN_SGEU = 15.U // 以上(>=)判定。符号なし
+  def FN_ADD  = UInt(0)  // addition
+  def FN_SL   = UInt(1)  // left shift
+  def FN_SEQ  = UInt(2)  // Equality(==)
+  def FN_SNE  = UInt(3)  // Inequality(!=)
+  def FN_XOR  = UInt(4)  // eXcrusive OR
+  def FN_SR   = UInt(5)  // logical right shift
+  def FN_OR   = UInt(6)  // logical OR
+  def FN_AND  = UInt(7)  // logical AND
+  def FN_SUB  = UInt(10) // subtraction
+  def FN_SRA  = UInt(11) // arithmetic right shift
+  def FN_SLT  = UInt(12) // Less Than(<)
+  def FN_SGE  = UInt(13) // Greater than or Equal(>=)
+  def FN_SLTU = UInt(14) // Less Than(<) for Unsigned value
+  def FN_SGEU = UInt(15) // Greater than or Equal(>=) for Unsigned value
 
-  /** 引き算の処理が必要かどうかを返します */
+  /** return true if subtraction is required */
   def isSub(cmd: UInt) = cmd(3)
 
-  /** 比較演算かどうか */
+  /** whether comparation */
   def isCmp(cmd: UInt) = cmd >= FN_SLT
 
-  /** 符号なし整数の比較か */
+  /** whetehr comparation of unsigned integer */
   def cmpUnsigned(cmd: UInt) = cmd(1)
 
-  /** 比較処理の結果にNOT演算が必要かどうかを返します */
+  /** return true if NOT operation to result of comparison is required */
   def cmpInverted(cmd: UInt) = cmd(0)
 
-  /** 比較処理の内で、等しいまたは等しくないの演算かどうか */
+  /** return true if equality operation */
   def cmpEq(cmd: UInt) = !cmd(3)
 }
 
@@ -93,8 +95,8 @@ import ScalarOpConstants._
 import MemoryOpConstants._
 import ALU._
 
-/** PencilRocket IのCPUコアです。
-  * Hello, worldが表示できる程度のRISC-V命令をサポートした、シングルステージの32ビットCPUです。
+/** a CPU core of "PencilRocket I".
+  * This is a single-stage 32-bit CPU that supports RISC-V instructions that can display "Hello, world".
   */
 class PencilRocketI extends Module {
   val io = IO(new Bundle {
@@ -103,42 +105,42 @@ class PencilRocketI extends Module {
   })
 
   /*****************************************
-   * プログラム・カウンタ生成処理(PC Generate)
+   * Program counter generation
    *****************************************/
-  // プログラム・カウンタ(アドレス0x8000_0000から開始する)
+  // Program counter(start at address 0x8000_0000)
   val pc = RegInit(UInt(32.W), "h8000_0000".U)
-  val npc = pc + 4.U // 次の命令アドレス
+  val npc = pc + 4.U // Next instruction address
 
   /*****************************************
-   * 命令取り出し処理(Instruction Fetch)
+   * Instruction Fetch
    *****************************************/
   io.iData.addr := pc
 
   /*****************************************
-   * 命令デコード処理(Instruction Decode)
+   * Instruction Decode
    *****************************************/
   val ibuf = Module(new IBuf)
   ibuf.io.imem := io.iData.inst
 
-  // 内部制御信号生成
+  // generate internal control signal
   val id_ctrl = Wire(new IntCtrlSigs).decode(ibuf.io.inst.bits, (new IDecode).table)
 
-  // レジスタアドレス
+  // Register address
   val id_raddr2 = ibuf.io.inst.rs2
   val id_raddr1 = ibuf.io.inst.rs1
   val id_waddr  = ibuf.io.inst.rd
-  val id_raddr = IndexedSeq(id_raddr1, id_raddr2) // 読み出しアドレスをまとめて扱う
+  val id_raddr = IndexedSeq(id_raddr1, id_raddr2) // Handle read addresses together
 
-  // レジスタ・ファイル読み出し
+  // Read register file
   val rf = new RegFile
-  val id_rs = id_raddr.map(rf.read _) // 読み出しレジスタの値のシーケンス
+  val id_rs = id_raddr.map(rf.read _) // Sequence of read register values
 
   /*****************************************
-   * 実行処理(Execute)
+   * Execute
    *****************************************/
   val ex_imm = ImmGen(id_ctrl.sel_imm, ibuf.io.inst.bits)
 
-  // ALU入力決定
+  // Determine the value to be input to ALU
   val ex_op1 = MuxLookup(id_ctrl.sel_alu1, 0.U(32.W), Seq(
     A1_RS1 -> id_rs(0),
     A1_PC -> pc))
@@ -147,14 +149,14 @@ class PencilRocketI extends Module {
     A2_IMM -> ex_imm.asUInt,
     A2_SIZE -> 4.U(32.W)))
 
-  // 演算装置
+  // ALU
   val alu = Module(new ALU)
   alu.io.fn := id_ctrl.alu_fn
   alu.io.in2 := ex_op2
   alu.io.in1 := ex_op1
 
   /*****************************************
-   * データメモリ読み書き処理(Memory)
+   * Read and write to memory
    *****************************************/
   io.dData.addr := alu.io.out
   io.dData.writeEnable := id_ctrl.mem_cmd === M_XWR
@@ -162,7 +164,7 @@ class PencilRocketI extends Module {
   io.dData.writeData := id_rs(1)
 
   /*****************************************
-   * レジスタ書き戻し処理(Write Back)
+   * Write Back
    *****************************************/
   val rf_wen = id_ctrl.wxd
   val rf_waddr = id_waddr
@@ -172,7 +174,7 @@ class PencilRocketI extends Module {
   when (rf_wen) { rf.write(rf_waddr, rf_wdata) }
 
   /*****************************************
-   * プログラム・カウンタの更新
+   * Program counter update
    *****************************************/
   pc := MuxCase(npc, Seq(
     (id_ctrl.branch === Y && alu.io.cmp_out ||
@@ -180,8 +182,8 @@ class PencilRocketI extends Module {
     (id_ctrl.jalr === Y) -> alu.io.out))
 }
 
-/** PencilRocket I CPU搭載のパーソナル・コンピュータのモジュールです。
-  * (本物のペンシルロケットが水平発射実験を行った地の名前にちなむ)
+/** Micorcomputer module with PencilRocket I CPU.
+  * (Kokubunji is the name of the place where a real Pencil Rocket did a horizontal launch experiment.)
   */
 class Kokubunji extends Module {
   val io = IO(new Bundle {
@@ -237,24 +239,23 @@ class Kokubunji extends Module {
   }
 }
 
-/** レジスタファイルです。
-  * モジュールとしては利用しないので、ただのクラスになっています。
-  * readやwriteはioのポートとして定義されないので、利用側の呼び出しの数だけ回路が形成されます。
+/** Register file
+  * Since this is not used as a module, it is just a class.
   */
 class RegFile {
-  // レジスタファイル本体(zeroレジスタの分は余分だが確保)
+  // Register file body
   val rf = Mem(32, UInt(32.W))
 
-  /** 読み出し
-    * @param addr 読み出しアドレス(0〜31)
+  /** Read a value of register
+    * @param addr Read address(0 - 31)
     */
   def read(addr: UInt) = {
     Mux(addr === 0.U, 0.U(32.W), rf(addr))
   }
 
-  /** 書き込み
-    * @param addr 書き込みアドレス(0〜31)
-    * @param data 書き込みデータ(32ビット)
+  /** Write a value to register
+    * @param addr Write address(0 - 31)
+    * @param data value to write(32 bit)
     */
   def write(addr: UInt, data: UInt) {
     when (addr =/= 0.U) {
@@ -263,71 +264,73 @@ class RegFile {
   }
 }
 
-/** 命令メモリ用バンドル
+/** Bundle for Instruction memory
   */
 class IDataBundle extends Bundle {
-  val addr = Input(UInt(32.W))  // プログラム・カウンタのアドレス
-  val inst = Output(UInt(32.W)) // 機械語の命令
+  val addr = Input(UInt(32.W))  // Address of program counter
+  val inst = Output(UInt(32.W)) // Machine code
 }
 
-/** 命令データメモリです。ROMとして実装しています。
-  * @param insts 命令データ(4KBまで。1024命令まで保存可能)
+/** Instruction memory. Configure as ROM.
+  * @param inits Instruction code(Up to 4KB. 1024 instructions)
+  * Int type may be a negative number, which causes an error when converted to UInt, so it is a Long type.
   */
 class IData(insts: List[Long]) extends Module {
   val io = IO(new IDataBundle)
 
-   // 最大命令数
+   // Max count of Instructions
   val wordMax = 1024
 
-  // ROMの元イメージ。1024命令に調整する。足りない分は0でパディング。
+  // Contents of ROM. Fill to 1024 instructions. Padding with zero.
   val image = insts ::: List.fill(wordMax - insts.length)(0L)
 
-  // ROM本体
+  // ROM
   val rom = VecInit(image.map((n) => n.asUInt(32.W)))
 
-  // 下位2ビットは無視して、4バイト単位でアクセスする。
+  // The lower 2 bits are ignored and accessed with 4-byte alignment.
   io.inst := rom(io.addr(log2Ceil(wordMax) - 1, 2))
 }
 
-/** データメモリ用バンドル
+/** Bundle for Data memory
   */
 class DDataBundle extends Bundle {
   val addr = Input(UInt(32.W))
-  val size = Input(UInt(2.W)) // データサイズ(0: 1バイト、1: 2バイト、2: 4バイト。funct3の下位2ビット)
+  val size = Input(UInt(2.W)) // Size of data(0: 1 byte, 1: 2 byte, 2: 4 byte.)
   val writeData = Input(UInt(32.W))
   val writeEnable = Input(Bool())
   val readData = Output(UInt(32.W))
 }
 
-/** データメモリです。(4KBの容量)
-  * @param inits 初期データ(32bit、リトル・エンディアンで格納されます)
+/** Data memory. (4KB Capacity)
+  * @param inits Initial data(32bit. store with little endian).
+  * Int type may be a negative number, which causes an error when converted to UInt, so it is a Long type.
   */
 class DData(inits: List[Long]) extends Module {
   val io = IO(new DDataBundle)
 
-   // 最大データ数
+   // Max count of Data
   val wordMax = 1024
 
-  // アクセスサイズ
-  val bAccess = 0.U // 1バイトアクセス
-  val hAccess = 1.U // 2バイトアクセス
-  val wAccess = 2.U // 4バイトアクセス
+  // Access data size
+  val bAccess = 0.U // 1 byte access
+  val hAccess = 1.U // 2 byte access
+  val wAccess = 2.U // 4 byte access
 
-  // RAMの初期イメージ。1024命令に調整する。
+  // Initial contents of RAM. Fill to 1024 instructions. Padding with zero.
   val image = inits ::: List.fill(wordMax - inits.length)(0L)
 
-  // RAM本体
+  // RAM
   val ram = RegInit(VecInit(image.map((n) => n.asUInt(32.W))))
 
-  // アドレス指定されたデータ
+  // Data of specified address. The lower 2 bits are ignored and accessed with 4-byte alignment.
   val accessWord = ram(io.addr(log2Ceil(wordMax) - 1, 2))
 
   /*
-   * 読み出し処理。下位2ビットは無視して、4バイト単位でアクセスする。
+   * Read. 
    */ 
   when (io.size === bAccess) {
     io.readData := Cat("h000".U,
-      // 下位2ビット分で読み出すビット・フィールドを決定
+      // Determine the bit field to be read by the lower 2 bits of addr
       MuxLookup(io.addr(1, 0), 0.U(8.W), Array(
         0.U -> accessWord(7, 0),
         1.U -> accessWord(15, 8),
@@ -335,7 +338,7 @@ class DData(inits: List[Long]) extends Module {
         3.U -> accessWord(31, 24))))
   } .elsewhen (io.size === hAccess) {
     io.readData := Cat("h00".U,
-      // ビット1で読み出すビット・フィールドを決定
+      // Bit 1 of addr determines which bit field to read
       MuxLookup(io.addr(1), 0.U(16.W), Array(
         0.U -> accessWord(15, 0),
         1.U -> accessWord(31, 16))))
@@ -344,7 +347,7 @@ class DData(inits: List[Long]) extends Module {
   }
 
   /*
-   * 書き込み処理
+   * Write
    */
   when (io.writeEnable) {
     when (io.size === bAccess) {
@@ -365,20 +368,20 @@ class DData(inits: List[Long]) extends Module {
   }
 }
 
-/** 命令コードとレジスタアドレスの保持バンドル
+/** Bundle of instruction code and register addresses
   */
 class ExpandedInstruction extends Bundle {
-  val bits = UInt(32.W)  // 命令コード
-  val rd = UInt(5.W)     // 宛先レジスタ・アドレス(レジスタ番号)
-  val rs1 = UInt(5.W)    // 元レジスタ1・アドレス
-  val rs2 = UInt(5.W)    // 元レジスタ2・アドレス
+  val bits = UInt(width = 32)  // Instruction code
+  val rd = UInt(5.W)     // Destination register address (register number)
+  val rs1 = UInt(5.W)    // Source register 1 address
+  val rs2 = UInt(5.W)    // Source register 2 address
 }
 
-/** RISC-V命令コード・デコードクラス
-  * @param x 機械語のビット列
+/** RISC-V instruction decode class
+  * @param x machine code
   */
 class RVCDecoder(x: UInt) {
-  /** 命令コードとレジスタアドレスの保持バンドルを返します。
+  /** Return bundle of instruction code and register address
     */
   def inst(bits: UInt, rd: UInt = x(11,7), rs1: UInt = x(19,15), rs2: UInt = x(24,20)) = {
     val res = Wire(new ExpandedInstruction)
@@ -390,7 +393,7 @@ class RVCDecoder(x: UInt) {
   }
 }
 
-/** 命令メモリの内容のデコードモジュール
+/** Module to decode instruction memory
   */
 class IBuf extends Module {
   val io = IO(new Bundle {
@@ -401,7 +404,7 @@ class IBuf extends Module {
   io.inst := new RVCDecoder(io.imem).inst(io.imem)
 }
 
-/** 命令コードのビット・パターン
+/** Bit pattern of instruction code
   */
 object Instructions {
   def BEQ                = BitPat("b?????????????????000?????1100011")
@@ -416,7 +419,7 @@ object Instructions {
 
 import Instructions._
 
-/** 命令コード -> 内部制御信号 対応定義
+/** Instruction -> Internal control signal
   */
 class IDecode {
   val table: Array[(BitPat, List[BitPat])] = Array(
@@ -438,20 +441,20 @@ class IDecode {
   )
 }
 
-/** 内部制御信号バンドル
+/** Internal control signal bundle
   */
 class IntCtrlSigs extends Bundle {
-  val branch = Bool() // 条件分岐命令(br)
-  val jal = Bool()    // 無条件分岐命令(jal)
-  val jalr = Bool()   // 無条件分岐命令(レジスタ指定)(jalr)
-  val sel_alu2 = Bits(A2_X.getWidth.W) // ALUの入力2の元データタイプ(s_alu2)
-  val sel_alu1 = Bits(A1_X.getWidth.W) // ALUの入力2の元データタイプ(s_alu1)
-  val sel_imm = Bits(IMM_X.getWidth.W) // imm
-  val alu_fn = Bits(FN_X.getWidth.W)   // ALUの呼び出し機能(alu)
-  val mem = Bool()                     // メモリアクセス命令(mem_val)
-  val mem_cmd = Bits(M_SZ)           // メモリアクセスの種類(mem_cmd)
-  val mem_type = Bits(MT_SZ)         // メモリアクセスのサイズ(mem_type)
-  val wxd = Bool()                   // レジスタ書き込みあり
+  val branch = Bool() // Conditional branch instruction(br)
+  val jal = Bool()    // jump instruction(jal)
+  val jalr = Bool()   // jump instruction with value of register(jalr)
+  val sel_alu2 = Bits(width = A2_X.getWidth) // Source data type of input2 of ALU(s_alu2)
+  val sel_alu1 = Bits(width = A1_X.getWidth) // Source data tyep of input1 of ALU(s_alu1)
+  val sel_imm = Bits(width = IMM_X.getWidth) // type of imm
+  val alu_fn = Bits(width = FN_X.getWidth)   // function requested to ALU(alu)
+  val mem = Bool()                           // Whether memory access instruction(mem_val)
+  val mem_cmd = Bits(width = M_SZ)           // Kind of memory access(mem_cmd)
+  val mem_type = Bits(width = MT_SZ)         // memory access size(mem_type)
+  val wxd = Bool()                           // wxd
 
   def default: List[BitPat] =
                 //     jal                                                                 
@@ -463,40 +466,42 @@ class IntCtrlSigs extends Bundle {
                 //   | | | |       |       |      |         | |    |     |
                 List(X,X,X,A2_X,   A1_X,   IMM_X, FN_X,     N,M_X, MT_X, X)
 
-  /** 機械語の値から、branch、jal等フィールドを設定する回路を生成します。
+  /** Generate a circuit to set fields such as "branch" and "jal" from machine code values.
     */
   def decode(inst: UInt, table: Iterable[(BitPat, List[BitPat])]) = {
     val decoder = DecodeLogic(inst, default, mappingIn = table)
 
-    // DecodeLogicが返して来た値を各フィールドに対応付ける
+    // Connect the value returned by DecodeLogic to the corresponding field
+    // Same as below.
     //  branch := decoder(0)
     //  jal    := decoder(1)
-    //  … と同じ
+    //  ...
     val sigs = Seq(branch, jal, jalr, sel_alu2,
                    sel_alu1, sel_imm, alu_fn, mem, mem_cmd, mem_type, wxd)
     sigs zip decoder map {case(s,d) => s := d}
 
-    this // Bundle自身を返す
+    this // Return this Bundle itself
   }
 }
 
 /**
-  * RISV-Vの機械語のビットパターンから、内部制御信号を生成
+  * Generate an internal control signal from the bit pattern of RISV-V machine code
   */
 object DecodeLogic {
-  /** 機械語から、各種制御信号のシーケンスを返します。
-    * @param addr  機械語
-    * @param mappinIn 命令のビットパターンと、対応する制御信号のシーケンス
+  /** 
+    * @param addr Machine code
+    * @param mappinIn Sequence of control signal corresponding to bit pattern of instruction
     */
   def apply(addr: UInt, default: Seq[BitPat], mappingIn: Iterable[(BitPat, Seq[BitPat])]): Seq[UInt] = {
     val mapping = ArrayBuffer.fill(default.size)(ArrayBuffer[(BitPat, BitPat)]())
 
-    // Array(BEQ-> List(Y, ...,A2_RS2, A1_RS1, ...), JALR-> List(N, ...,A2_IMM, A1_RS1, ...), ...) の並びから、
+    // Reorder from
+    // Array(BEQ-> List(Y, ...,A2_RS2, A1_RS1, ...), JALR-> List(N, ...,A2_IMM, A1_RS1, ...), ...) 
+    // To 
     // ArrayBuffer(ArrayBuffer(BEQ -> Y, JALR -> N, ...),
     //             ...
     //             ArrayBuffer(BEQ -> A2_RS2, JALR -> A2_IMM, ...),
     //             ArrayBuffer(BEQ -> A1_RS1, JALR -> A1_RS1, ...), ...)
-    // の形に並び替え
     for ((key, values) <- mappingIn)
       for ((value, i) <- values zipWithIndex)
         mapping(i) += key -> value
@@ -505,28 +510,28 @@ object DecodeLogic {
       yield apply(addr, thisDefault, thisMapping)
   }
 
-  /** 1種類の制御信号を、機械語から生成する。
-    * @param addr  機械語
-    * @param mappinIn 命令のビットパターンと、対応する制御信号のシーケンス
+  /** Generate One control signal from machine code
+    * @param addr Machine code
+    * @param mappinIn Sequence of control signal corresponding to bit pattern of instruction
     */
   def apply(addr: UInt, default: BitPat, mapping: Iterable[(BitPat, BitPat)]): UInt = {
+    // Convert to below form
     // MuxCase(default.value, Seq(
     //   addr === BEQ -> A2_RS2,
     //   addr === JALR -> A2_IMM, ...))
-    // の形に変形
     MuxCase(default.value.U,
       mapping.map{ case (instBitPat, ctrlSigBitPat) => (addr === instBitPat) -> ctrlSigBitPat.value.U }.toSeq)
   }
 }
 
-/** 即値生成クラス
+/** Generate immidate value
   */
 object ImmGen {
-  /** 命令から即値を生成します。
-    * @param sel 命令形式。ScalarOpConstantsの、IMM_X形式の定数
-    * @param inst 機械語命令
+  /** Generate immediate value from machine code
+    * @param sel Instruction format. Constant IMM_X defined ScalarOpConstants trait
+    * @param inst machine code instruction
     * 
-    * @return 32ビットの符号あり整数
+    * @return 32 bit width signed integer
     */
   def apply(sel: UInt, inst: UInt) = {
     val sign = Mux(sel === IMM_Z, 0.S, inst(31).asSInt)
@@ -551,26 +556,26 @@ object ImmGen {
   */
 class ALU extends Module {
   val io = IO(new Bundle {
-    val fn = Input(UInt(SZ_ALU_FN)) // 演算の機能種類の指定
-    val in2 = Input(UInt(32.W))     // 被演算数1
-    val in1 = Input(UInt(32.W))     // 被演算数2
-    val out = Output(UInt(32.W))    // 演算結果
-    val adder_out = Output(UInt(32.W)) // 加減算結果
-    val cmp_out = Output(Bool())       // 比較結果
+    val fn = Input(Bits(SZ_ALU_FN)) // Type of calcuration
+    val in2 = Input(UInt(32.W))     // operand1
+    val in1 = Input(UInt(32.W))     // operand2
+    val out = Output(UInt(32.W))    // result of calcuration
+    val adder_out = Output(UInt(32.W)) // result of addition
+    val cmp_out = Output(Bool())       // result of comparison
   })
 
-  // 加算、減算
+  // addition, subtraction
   val in2_inv = Mux(isSub(io.fn), ~io.in2, io.in2)
   val in1_xor_in2 = io.in1 ^ in2_inv
   io.adder_out := io.in1 + in2_inv + isSub(io.fn)
 
-  // 各種比較(未満、等値、不等)
+  // comparison(less than, equality, inequality)
   val slt =
     Mux(io.in1(31) === io.in2(31), io.adder_out(31),
     Mux(cmpUnsigned(io.fn), io.in2(31), io.in1(31)))
   io.cmp_out := cmpInverted(io.fn) ^ Mux(cmpEq(io.fn), in1_xor_in2 === 0.U, slt)
 
-  // シフト演算
+  // shift operation
   val (shamt, shin_r) = (io.in2(4,0), io.in1)
   val shin = Mux(io.fn === FN_SR  || io.fn === FN_SRA, shin_r, Reverse(shin_r))
   val shout_r = (Cat(isSub(io.fn) & shin(31), shin).asSInt >> shamt)(31,0)
@@ -578,7 +583,7 @@ class ALU extends Module {
   val shout = Mux(io.fn === FN_SR || io.fn === FN_SRA, shout_r, 0.U) |
               Mux(io.fn === FN_SL,                     shout_l, 0.U)
 
-  // ビット演算(補足: A XOR B | A AND Bは、 A OR Bと同じ)
+  // bitwise operation("A XOR B | A AND B" is same as "A OR B")
   val logic = Mux(io.fn === FN_XOR || io.fn === FN_OR, in1_xor_in2, 0.U) |
               Mux(io.fn === FN_OR || io.fn === FN_AND, io.in1 & io.in2, 0.U)
   val shift_logic = (isCmp(io.fn) && slt) | logic | shout
@@ -587,7 +592,7 @@ class ALU extends Module {
   io.out := out
 }
 
-/** プログラムデータ
+/** Program Data
   */
 object Program {
   val iData = List(0x00001417L, 0x00040413L, 0x00040503L, 0x00140413L,
@@ -597,7 +602,7 @@ object Program {
   val dData = List(0x6c6c6548L, 0x77202c6fL, 0x646c726fL, 0x00000a21L)
 }
 
-/** CPUを1クロックで全ての処理をさせるため、クロックを下げるクラス。
+/** Reduce the clock frequency
   */
 class SlowClock extends BlackBox with HasBlackBoxInline {
   val io = IO(new Bundle {
@@ -606,7 +611,7 @@ class SlowClock extends BlackBox with HasBlackBoxInline {
   })
 }
 
-/** PencilRocket Coreを搭載したパソコンのVelilogファイルを生成するオブジェクト
+/** Object to generate a Velilog file of a Microcomputer with PencilRocket Core
   */
 object PencilRocketPC extends App {
   chisel3.Driver.execute(args, () => new Kokubunji)
